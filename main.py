@@ -8,10 +8,11 @@
 import sys
 import argparse
 import json
-
-from operator import itemgetter
+import os
 import datetime
 import re
+
+
 
 def get_cli_input():
 		parser = argparse.ArgumentParser(description=__doc__)
@@ -20,18 +21,7 @@ def get_cli_input():
 
 		return args
 
-# Source: https://gist.github.com/kgriffs/c20084db6686fee2b363fdc1a8998792
-def createRegexPattern(version):
-	return re.compile(
-		(
-			'[a-f0-9]{8}-' +
-			'[a-f0-9]{4}-' +
-			version + '[a-f0-9]{3}-' +
-			'[89ab][a-f0-9]{3}-' +
-			'[a-f0-9]{12}$'
-		),
-		re.IGNORECASE
-	)
+
 
 def validate_file_log(file, index):
 	# print('{0}    :{1}'.format(index, file))
@@ -47,10 +37,14 @@ def validate_file_log(file, index):
 	validate_UUID(file['uu'], all_pattern)
 	validate_UUID(file['bg'], all_pattern)
 
-	# validate_file_name(file['nm'])
+	validate_sha(file['sha'])
+
+	name, ext = validate_file_name(file['nm'])
 	# validate_path(file['ph'])
 	
 	# validate_disposition(file['dp'])
+
+
 
 '''
 	Take in a Unix millisecond timestamp and verify it by casting it to
@@ -61,8 +55,9 @@ def validate_timestamp(time):
 		timestamp = datetime.datetime.fromtimestamp(time)
 		return True
 	except:
-		print('Invalid timestamp')
-		return False
+		raise ValueError('Value {0}: Invalid timestamp'.format(time))
+
+
 
 '''
 	Take in a time value and verify that it is a positive number or 0
@@ -71,13 +66,29 @@ def validate_time(time):
 	try:
 		return (True if int(time) >= 0 else False)
 	except:
-		print('Invalid time value')
-		return False
+		raise ValueError('Value {0}: Invalid time value'.format(time))
+
+
+
+# Source: https://gist.github.com/kgriffs/c20084db6686fee2b363fdc1a8998792
+def createRegexPattern(version):
+	return re.compile(
+		(
+			'[a-f0-9]{8}-' +
+			'[a-f0-9]{4}-' +
+			version + '[a-f0-9]{3}-' +
+			'[89ab][a-f0-9]{3}-' +
+			'[a-f0-9]{12}$'
+		),
+		re.IGNORECASE
+	)
+
+
 
 '''
-	Take in a UUID string and attempt to verify it as a 8-4-4-4-12 format
-	string using regex. Does not enforce a version value, as specified in 
-	the response to the email.
+	Take in a UUID string and verify it as a 8-4-4-4-12 format
+	string using regex. Does not enforce a version value, according to the
+	clarification email.
 
 	Otherwise, we could just test for UUIDv4 using the UUID package and casting
 	the string to a new UUID.
@@ -85,21 +96,46 @@ def validate_time(time):
 def validate_UUID(uuid_to_test, pattern):
 
 	if(len(uuid_to_test) != 36): 
-		print('Invalid UUID Length:', uuid_to_test)
-		return False
-	
+		raise ValueError('Invalid UUID length')
+
 	if(pattern.match(uuid_to_test)):
 		return True
 	else:
-		print('Invalid UUID:', uuid_to_test)
-		return False 
+		raise ValueError('Value {0}: Invalid UUID format'.format(uuid_to_test))
+
+
+
+'''
+	Take in a sha256 string and check to ensure it is:
+		64 characters long
+		Has only hexadecimal values
+	The cast to int will error if invalid hex values are passed.
+'''
+def validate_sha(sha):
+	if(len(sha) != 64):
+		raise ValueError('Value {0}: Invalid length for sha256'.format(sha))
+	try:
+		int(sha, 16)
+	except:
+		raise ValueError('Value {0}: Invalid sha16 value'.format(sha))
+
+
 
 def validate_file_name(name):
-	return
+	# Check that the filename doesn't start or end with a slash
+	if(name.startswith(('/', '\\')) or name.endswith(('/', '\\'))):
+		raise ValueError('Value {0}: Filename contains invalid slash characters.'.format(name))
+	name, ext = os.path.splitext(name)
+	if(len(ext) == 0):
+		raise ValueError('Value {0}: Filename has no extension'.format(name))
+	return (name, ext)
 
 
-def validate_path(path):
+
+def validate_path(path, name, ext):
+	# Check that the file at the
 	return
+
 
 
 def validate_disposition(dp):
@@ -115,14 +151,17 @@ def main():
 		with open(args.input, 'r') as file:
 			for num, line in enumerate(file, start=1):
 
+				# loop over the values, attempting to validate. Catch ValueErrors thrown by the validator. 
 				try:
 					json_file = json.loads(line)
 					validate_file_log(json.loads(line), num)
-				except:
-					print('Issue loading line {}'.format(num))
+				except ValueError as value_error:
+					print('Invalid line (#{0}): {1}'.format(num, value_error))
+				except Exception as e:
+					print('Issue loading line {0}: {1}'.format(num, e))
 					
 	except Exception as e:
-		print('Error: {}', e)
+		print('Error opening file.')
 
 
 
