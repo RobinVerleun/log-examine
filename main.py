@@ -126,6 +126,8 @@ def validate_file_name(name):
 	# Check that the filename doesn't start or end with a slash
 	if(name.startswith(('/', '\\')) or name.endswith(('/', '\\'))):
 		raise ValueError('Value {0}: Filename contains invalid slash characters.'.format(name))
+
+	# Extract the name and extension from the filename and confirm the extension exists	
 	name, ext = os.path.splitext(name)
 	if(len(ext) == 0):
 		raise ValueError('Value {0}: Filename has no extension'.format(name))
