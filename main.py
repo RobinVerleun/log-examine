@@ -40,7 +40,7 @@ def validate_file_log(file, index):
 	validate_sha(file['sha'])
 
 	name, ext = validate_file_name(file['nm'])
-	# validate_path(file['ph'])
+	validate_path(file['ph'], name, ext)
 	
 	# validate_disposition(file['dp'])
 
@@ -133,7 +133,8 @@ def validate_file_name(name):
 
 
 def validate_path(path, name, ext):
-	# Check that the file at the
+	# Assumption: filepaths don't need leading or trailing slashes to be valid
+	_path, _file = os.path.split(path)
 	return
 
 
