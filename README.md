@@ -20,3 +20,8 @@ If the file contains invalid entries and they should be printed to the console,
 run the command
 
 `python './main.py <filename> [-v, --verbose]`
+
+
+To run the unit tests, run:
+
+`python './validator.test.py`
