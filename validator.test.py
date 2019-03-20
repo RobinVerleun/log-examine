@@ -81,25 +81,25 @@ class TestValidatorMethods(unittest.TestCase):
 		)
 		self.errors(3)
 
-	def test_valid_validate_UUID(self):
-		pattern = self.validator.createRegexPattern('[0-5]')
-		self.validator.validate_UUID('36b2355d-1eda-4a02-82c9-e0ee1fcea334', pattern)
+	def test_valid_validate_uuid(self):
+		pattern = self.validator.create_regex_pattern('[0-5]')
+		self.validator.validate_uuid('36b2355d-1eda-4a02-82c9-e0ee1fcea334', pattern)
 		self.assertEqual(
 			self.validator.valid, True,
-			'validate_UUID: fails on a valid UUID'
+			'validate_uuid: fails on a valid UUID'
 		)
 
-	def test_invalid_validate_UUID(self):
-		pattern = self.validator.createRegexPattern('[0-5]')
-		self.validator.validate_UUID('36b2355d-1eda-9a02-82c9-e0ee1fcea334', pattern)
+	def test_invalid_validate_uuid(self):
+		pattern = self.validator.create_regex_pattern('[0-5]')
+		self.validator.validate_uuid('36b2355d-1eda-9a02-82c9-e0ee1fcea334', pattern)
 		self.assertEqual(
 			self.validator.valid, False,
-			'validate_UUID: does not fail on an invalid Version UUID'
+			'validate_uuid: does not fail on an invalid Version UUID'
 		)
-		self.validator.validate_UUID('36b2355d-1eda-9a02-82c9-e0ee1fcea', pattern)
+		self.validator.validate_uuid('36b2355d-1eda-9a02-82c9-e0ee1fcea', pattern)
 		self.assertEqual(
 			self.validator.valid, False,
-			'validate_UUID: does not fail on a too short UUID string'
+			'validate_uuid: does not fail on a too short UUID string'
 		)
 		self.errors(2)
 
