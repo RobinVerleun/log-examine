@@ -1,6 +1,6 @@
 # log-examine
 
-A Python scipt which take in a file of JSON objects and read them in one at a time.
+A Python scipt which take in a file of JSON objects acting as file logs and reads them in one at a time.
 Returns a printout of unique extensions and how many times they appear within the log.
 
 Only valid file logs in all field are parsed and logged.
